@@ -1,0 +1,20 @@
+[Unit]
+Description=AI PC Monitoring System
+After=network.target syslog.target
+
+[Service]
+Type=simple
+User=seoyc
+Group=seoyc
+# 환경 변수 파일을 통해 API 키 등을 관리합니다.
+EnvironmentFile=-/etc/default/ai-monitoring
+ExecStart=/usr/local/bin/ai-monitoring start
+Restart=always
+RestartSec=5
+
+# 로그 출력 설정
+StandardOutput=append:/var/log/ai-monitoring.log
+StandardError=append:/var/log/ai-monitoring.log
+
+[Install]
+WantedBy=multi-user.target

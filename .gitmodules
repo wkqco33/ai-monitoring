@@ -1,3 +1,6 @@
 [submodule "LLM_client_go"]
 	path = LLM_client_go
 	url = https://github.com/wkqco33/LLM_client_go.git
+[submodule "wcli"]
+	path = wcli
+	url = https://github.com/wkqco33/wcli
