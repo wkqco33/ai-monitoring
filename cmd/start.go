@@ -3,64 +3,83 @@ package cmd
 import (
 	"context"
 	"log/slog"
-	"os"
 	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/seoyc/wcli"
+	"github.com/seoyc/wcli/rich"
 	"ai-monitoring/analyzer"
 	"ai-monitoring/config"
 	"ai-monitoring/monitor"
 	"ai-monitoring/notifier"
 )
 
-var startCmd = &cobra.Command{
+var (
+	interval        time.Duration
+	cpuThreshold    float64
+	memThreshold    float64
+	cooldownPeriod  time.Duration
+	azureEndpoint   string
+	azureOpenAIKey  string
+	azureDeployment string
+)
+
+var startCmd = &wcli.Command{
 	Use:   "start",
 	Short: "Start monitoring",
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.DefaultConfig()
+	Run: func(ctx *wcli.Context) error {
+		cfg := config.GlobalConfig
 
-		interval, _ := cmd.Flags().GetDuration("interval")
-		if interval > 0 {
+		// 플래그가 명시적으로 설정된 경우 설정을 덮어씁니다.
+		if ctx.IsSet("interval") {
 			cfg.CheckInterval = interval
 		}
-
-		cpu, _ := cmd.Flags().GetFloat64("cpu")
-		if cpu > 0 {
-			cfg.CPUThreshold = cpu
+		if ctx.IsSet("cpu") {
+			cfg.CPUThreshold = cpuThreshold
+		}
+		if ctx.IsSet("mem") {
+			cfg.MemoryThreshold = memThreshold
+		}
+		if ctx.IsSet("cooldown") {
+			cfg.CooldownPeriod = cooldownPeriod
+		}
+		if ctx.IsSet("azure-endpoint") {
+			cfg.AzureEndpoint = azureEndpoint
+		}
+		if ctx.IsSet("azure-key") {
+			cfg.AzureOpenAIKey = azureOpenAIKey
+		}
+		if ctx.IsSet("azure-deployment") {
+			cfg.AzureDeployment = azureDeployment
 		}
 
-		mem, _ := cmd.Flags().GetFloat64("mem")
-		if mem > 0 {
-			cfg.MemoryThreshold = mem
-		}
+		rich.Println("[bold][green]Starting ai-monitoring[/green][/bold]")
+		rich.Println("[dim]Interval: %v, CPU Threshold: %.1f%%, Memory Threshold: %.1f%%[/dim]", 
+			cfg.CheckInterval, cfg.CPUThreshold, cfg.MemoryThreshold)
 
-		cooldown, _ := cmd.Flags().GetDuration("cooldown")
-		if cooldown > 0 {
-			cfg.CooldownPeriod = cooldown
+		// 부팅 로그 진단
+		rich.Println("[cyan]Checking system boot logs...[/cyan]")
+		bootLogs, err := monitor.GetBootLogs()
+		if err != nil {
+			rich.Println("[yellow]Warning: Could not fetch boot logs: %v[/yellow]", err)
+		} else {
+			summary := monitor.GetBootSummary(bootLogs)
+			rich.Println("[dim]Recent Boot Issues:\n%s[/dim]", summary)
+			
+			rich.Println("[magenta]Analyzing boot logs with LLM...[/magenta]")
+			bootAnalysis, err := analyzer.AnalyzeBootLogs(context.Background(), cfg, bootLogs)
+			if err != nil {
+				rich.Println("[red]Boot diagnosis failed: %v[/red]", err)
+			} else {
+				rich.Println("[bold][white]Boot Diagnosis:[/white][/bold]")
+				rich.Println("[white]%s[/white]", bootAnalysis)
+			}
 		}
-
-		cfg.AzureEndpoint, _ = cmd.Flags().GetString("azure-endpoint")
-		cfg.AzureOpenAIKey, _ = cmd.Flags().GetString("azure-key")
-		cfg.AzureDeployment, _ = cmd.Flags().GetString("azure-deployment")
-		
-		if cfg.AzureEndpoint == "" {
-			cfg.AzureEndpoint = os.Getenv("AZURE_ENDPOINT")
-		}
-		if cfg.AzureOpenAIKey == "" {
-			cfg.AzureOpenAIKey = os.Getenv("AZURE_API_KEY")
-		}
-		if cfg.AzureDeployment == "" {
-			cfg.AzureDeployment = os.Getenv("AZURE_DEPLOYMENT")
-		}
-
-		slog.Info("Starting ai-monitoring", "interval", cfg.CheckInterval, "cpu_threshold", cfg.CPUThreshold, "mem_threshold", cfg.MemoryThreshold)
 
 		triggerCh := make(chan *monitor.SystemState)
 		go monitor.Start(cfg, triggerCh)
 
 		var lastAlert time.Time
-
-		ctx := context.Background()
+		runCtx := context.Background()
 
 		for state := range triggerCh {
 			if time.Since(lastAlert) < cfg.CooldownPeriod {
@@ -68,28 +87,33 @@ var startCmd = &cobra.Command{
 				continue
 			}
 
-			slog.Info("Anomaly detected. Starting analysis...")
+			rich.Println("[yellow]Anomaly detected. Starting analysis...[/yellow]")
 			lastAlert = time.Now()
 
-			analysis, err := analyzer.AnalyzeSystemState(ctx, cfg, state)
+			analysis, err := analyzer.AnalyzeSystemState(runCtx, cfg, state)
 			if err != nil {
-				slog.Error("Failed to analyze system state", "error", err)
+				rich.Println("[red]Failed to analyze system state: %v[/red]", err)
 				continue
 			}
 
-			slog.Info("Analysis complete", "result", analysis)
+			rich.Println("[bold][cyan]Analysis complete[/cyan][/bold]")
+			rich.Println("[white]%s[/white]", analysis)
+			
 			notifier.Notify(cfg, "PC 상태 이상 감지", analysis)
 		}
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().Duration("interval", 10*time.Second, "Check interval")
-	startCmd.Flags().Float64("cpu", 90.0, "CPU usage threshold (%)")
-	startCmd.Flags().Float64("mem", 90.0, "Memory usage threshold (%)")
-	startCmd.Flags().Duration("cooldown", 5*time.Minute, "Cooldown period for alerts")
-	startCmd.Flags().String("azure-endpoint", "", "Azure OpenAI Endpoint URL")
-	startCmd.Flags().String("azure-key", "", "Azure OpenAI API Key")
-	startCmd.Flags().String("azure-deployment", "", "Azure OpenAI Deployment Name")
+	
+	f := startCmd.Flags()
+	f.DurationVar(&interval, "interval", "i", 10*time.Second, "Check interval")
+	f.Float64Var(&cpuThreshold, "cpu", "c", 90.0, "CPU usage threshold (%)")
+	f.Float64Var(&memThreshold, "mem", "m", 90.0, "Memory usage threshold (%)")
+	f.DurationVar(&cooldownPeriod, "cooldown", "C", 5*time.Minute, "Cooldown period for alerts")
+	f.StringVar(&azureEndpoint, "azure-endpoint", "e", "", "Azure OpenAI Endpoint URL")
+	f.StringVar(&azureOpenAIKey, "azure-key", "k", "", "Azure OpenAI API Key")
+	f.StringVar(&azureDeployment, "azure-deployment", "D", "", "Azure OpenAI Deployment Name")
 }
