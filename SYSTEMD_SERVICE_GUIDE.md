@@ -24,16 +24,24 @@ API 키와 같은 민감한 정보를 안전하게 관리하기 위해 환경 �
 # 템플릿 복사
 sudo cp ai-monitoring.env.example /etc/default/ai-monitoring
 
-# 파일 편집 (API 키, 엔드포인트, 디플로이먼트 명 입력)
+# 파일 편집 (AI_MONITORING_ 접두사 형식으로 입력)
 sudo nano /etc/default/ai-monitoring
 ```
 
 `/etc/default/ai-monitoring` 파일 예시:
 ```env
-AZURE_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_API_KEY=your-api-key-here
-AZURE_DEPLOYMENT=gpt-4o
+AI_MONITORING_CHECK_INTERVAL=10s
+AI_MONITORING_CPU_THRESHOLD=90.0
+AI_MONITORING_MEMORY_THRESHOLD=90.0
+AI_MONITORING_AZURE_ENDPOINT=https://your-resource.openai.azure.com/
+AI_MONITORING_AZURE_API_KEY=your-api-key-here
+AI_MONITORING_AZURE_DEPLOYMENT=gpt-4o
+AI_MONITORING_BOT_TOKEN=your-bot-token-here
+AI_MONITORING_COOLDOWN_PERIOD=5m
 ```
+
+`ai-monitoring`는 `config/config.go`의 설정 규칙에 따라 `AI_MONITORING_` 접두사가 붙은 환경 변수만 읽습니다.
+따라서 `AZURE_ENDPOINT` 같은 이름은 인식되지 않고, 반드시 `AI_MONITORING_AZURE_ENDPOINT` 형식으로 지정해야 합니다.
 
 ### 3단계: 로그 파일 생성 및 권한 설정
 서비스가 로그를 기록할 수 있도록 파일을 생성하고 권한을 부여합니다. (현재 사용자: `seoyc` 기준)
@@ -85,4 +93,4 @@ sudo usermod -aG systemd-journal seoyc
 ```
 
 ### API 호출 실패
-`/var/log/ai-monitoring.log`를 확인하여 `Azure OpenAI 설정이 누락되었습니다` 또는 `Network Error`가 발생하는지 확인하세요. `/etc/default/ai-monitoring` 파일의 변수명이 정확한지 다시 점검하십시오.
+`/var/log/ai-monitoring.log`를 확인하여 `Azure OpenAI 설정이 누락되었습니다` 또는 `Network Error`가 발생하는지 확인하세요. `/etc/default/ai-monitoring` 파일의 변수명이 `AI_MONITORING_` 접두사 형식인지 다시 점검하십시오.

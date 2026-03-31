@@ -3,6 +3,10 @@
 BINARY_NAME=ai-monitoring
 PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
+GO ?= $(shell command -v go 2>/dev/null)
+ifeq ($(strip $(GO)),)
+GO := /usr/local/go/bin/go
+endif
 
 .PHONY: all build clean install uninstall test fmt vet tidy help
 
@@ -12,7 +16,7 @@ all: build
 # 프로젝트 빌드
 build:
 	@echo "Building $(BINARY_NAME)..."
-	go build -o $(BINARY_NAME) main.go
+	$(GO) build -o $(BINARY_NAME) main.go
 
 # 빌드 결과물 삭제
 clean:
@@ -33,22 +37,22 @@ uninstall:
 # 테스트 실행
 test:
 	@echo "Running tests..."
-	go test -v ./...
+	$(GO) test -v ./...
 
 # 코드 포맷팅
 fmt:
 	@echo "Formatting code..."
-	go fmt ./...
+	$(GO) fmt ./...
 
 # 정적 분석
 vet:
 	@echo "Running go vet..."
-	go vet ./...
+	$(GO) vet ./...
 
 # 의존성 정리
 tidy:
 	@echo "Tidying go modules..."
-	go mod tidy
+	$(GO) mod tidy
 
 # 도움말
 help:
