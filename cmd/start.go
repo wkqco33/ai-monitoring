@@ -57,6 +57,9 @@ var startCmd = &wcli.Command{
 			cfg.CheckInterval, cfg.CPUThreshold, cfg.MemoryThreshold)
 
 		// 부팅 로그 진단
+		rich.Println("[cyan]Waiting for network to stabilize (5s)...[/cyan]")
+		time.Sleep(5 * time.Second)
+
 		rich.Println("[cyan]Checking system boot logs...[/cyan]")
 		bootLogs, err := monitor.GetBootLogs()
 		if err != nil {
@@ -66,9 +69,20 @@ var startCmd = &wcli.Command{
 			rich.Println("[dim]Recent Boot Issues:\n%s[/dim]", summary)
 			
 			rich.Println("[magenta]Analyzing boot logs with LLM...[/magenta]")
-			bootAnalysis, err := analyzer.AnalyzeBootLogs(context.Background(), cfg, bootLogs)
+			
+			var bootAnalysis string
+			maxRetries := 5
+			for i := 0; i < maxRetries; i++ {
+				bootAnalysis, err = analyzer.AnalyzeBootLogs(context.Background(), cfg, bootLogs)
+				if err == nil {
+					break
+				}
+				rich.Println("[yellow]Boot diagnosis attempt %d failed: %v. Retrying in 5s...[/yellow]", i+1, err)
+				time.Sleep(5 * time.Second)
+			}
+
 			if err != nil {
-				rich.Println("[red]Boot diagnosis failed: %v[/red]", err)
+				rich.Println("[red]Boot diagnosis failed after %d attempts: %v[/red]", maxRetries, err)
 			} else {
 				rich.Println("[bold][white]Boot Diagnosis:[/white][/bold]")
 				rich.Println("[white]%s[/white]", bootAnalysis)

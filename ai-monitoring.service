@@ -1,6 +1,7 @@
 [Unit]
 Description=AI PC Monitoring System
-After=network.target syslog.target
+After=network-online.target syslog.target
+Wants=network-online.target
 
 [Service]
 Type=simple
