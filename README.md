@@ -71,7 +71,7 @@ sudo make install
 ~/.config/ai-monitoring/config.yaml
 ```
 
-예시 파일은 `config.example.yaml`에 있습니다. 이 파일을 복사해 실제 값으로 수정한 뒤 사용하세요.
+예시 파일는 `config.example.yaml`에 있습니다. 이 파일을 복사해 실제 값으로 수정한 뒤 사용하세요.
 
 ### 2. 환경변수 사용
 
@@ -80,6 +80,9 @@ sudo make install
 예시:
 
 ```bash
+export AI_MONITORING_LLM_PROVIDER=ollama # azure 또는 ollama
+export AI_MONITORING_OLLAMA_ENDPOINT=http://localhost:11434
+export AI_MONITORING_OLLAMA_MODEL=llama3
 export AI_MONITORING_CHECK_INTERVAL=10s
 export AI_MONITORING_CPU_THRESHOLD=90.0
 export AI_MONITORING_MEMORY_THRESHOLD=90.0
@@ -94,6 +97,9 @@ export AI_MONITORING_COOLDOWN_PERIOD=5m
 
 | 키 | 타입 | 기본값 | 설명 |
 | --- | --- | --- | --- |
+| `llm_provider` | string | `azure` | LLM 제공자 (`azure`, `ollama`) |
+| `ollama_endpoint` | string | `http://localhost:11434` | Ollama 서버 API 엔드포인트 |
+| `ollama_model` | string | `llama3` | Ollama에서 사용할 모델명 |
 | `check_interval` | duration | `10s` | 시스템 상태를 확인하는 주기 |
 | `cpu_threshold` | float | `90.0` | CPU 사용률 경고 기준(%) |
 | `memory_threshold` | float | `90.0` | 메모리 사용률 경고 기준(%) |
@@ -102,6 +108,7 @@ export AI_MONITORING_COOLDOWN_PERIOD=5m
 | `azure_deployment` | string | 없음 | Azure OpenAI 배포 이름 |
 | `bot_token` | string | 없음 | 알림 봇 토큰 예약 값 |
 | `cooldown_period` | duration | `5m` | 동일 알림 재전송 최소 간격 |
+
 
 ### 예시 `config.yaml`
 

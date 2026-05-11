@@ -8,26 +8,53 @@ import (
 
 	llm "llm-client-go"
 	"llm-client-go/azure"
+	"llm-client-go/ollama"
 	"ai-monitoring/config"
 	"ai-monitoring/monitor"
 )
 
-// AnalyzeSystemState Azure OpenAI를 사용하여 시스템 상태를 분석합니다.
-func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monitor.SystemState) (string, error) {
-	if cfg.AzureEndpoint == "" || cfg.AzureOpenAIKey == "" {
-		return "", fmt.Errorf("Azure OpenAI 설정이 누락되었습니다")
-	}
+// LLMClient는 다양한 LLM 제공자를 추상화하는 인터페이스입니다.
+type LLMClient interface {
+	Complete(ctx context.Context, req llm.ChatRequest) (*llm.ChatResponse, error)
+}
 
-	client := azure.New(azure.Config{
-		Endpoint: cfg.AzureEndpoint,
-		APIKey:   cfg.AzureOpenAIKey,
-	})
+// getClient는 설정에 따라 적절한 LLM 클라이언트를 반환합니다.
+func getClient(cfg *config.AppConfig) (LLMClient, error) {
+	switch cfg.LLMProvider {
+	case "ollama":
+		return ollama.New(ollama.Config{
+			BaseURL: cfg.OllamaEndpoint,
+		}), nil
+	case "azure":
+		if cfg.AzureEndpoint == "" || cfg.AzureOpenAIKey == "" {
+			return nil, fmt.Errorf("Azure OpenAI 설정이 누락되었습니다")
+		}
+		return azure.New(azure.Config{
+			Endpoint: cfg.AzureEndpoint,
+			APIKey:   cfg.AzureOpenAIKey,
+		}), nil
+	default:
+		return nil, fmt.Errorf("지원하지 않는 LLM 제공자입니다: %s", cfg.LLMProvider)
+	}
+}
+
+// AnalyzeSystemState 시스템 상태를 분석합니다.
+func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monitor.SystemState) (string, error) {
+	client, err := getClient(cfg)
+	if err != nil {
+		return "", err
+	}
 
 	prompt := formatPrompt(state)
 	slog.Debug("LLM에 프롬프트 전송", "prompt", prompt)
 
+	model := cfg.AzureDeployment
+	if cfg.LLMProvider == "ollama" {
+		model = cfg.OllamaModel
+	}
+
 	req := llm.ChatRequest{
-		Model: cfg.AzureDeployment,
+		Model: model,
 		Messages: []llm.Message{
 			{
 				Role:    llm.RoleSystem,
@@ -40,7 +67,7 @@ func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monit
 		},
 	}
 
-	ctxTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(ctx, 90*time.Second)
 	defer cancel()
 
 	resp, err := client.Complete(ctxTimeout, req)
@@ -55,21 +82,22 @@ func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monit
 	return "", fmt.Errorf("LLM에서 응답을 받지 못했습니다")
 }
 
-// AnalyzeBootLogs Azure OpenAI를 사용하여 부팅 로그를 진단합니다.
+// AnalyzeBootLogs 부팅 로그를 진단합니다.
 func AnalyzeBootLogs(ctx context.Context, cfg *config.AppConfig, logs string) (string, error) {
-	if cfg.AzureEndpoint == "" || cfg.AzureOpenAIKey == "" {
-		return "", fmt.Errorf("Azure OpenAI 설정이 누락되었습니다")
+	client, err := getClient(cfg)
+	if err != nil {
+		return "", err
 	}
 
-	client := azure.New(azure.Config{
-		Endpoint: cfg.AzureEndpoint,
-		APIKey:   cfg.AzureOpenAIKey,
-	})
+	prompt := fmt.Sprintf("다음은 시스템 부팅 시 발생한 주요 로그 또는 에러 메시지입니다:\n\n%s\n\n이 로그들을 분석하여 시스템 안정성에 문제가 없는지 진단하고, 발견된 특이사항와 조치 방법을 한국어로 간결하게 설명해주세요.", logs)
 
-	prompt := fmt.Sprintf("다음은 시스템 부팅 시 발생한 주요 로그 또는 에러 메시지입니다:\n\n%s\n\n이 로그들을 분석하여 시스템 안정성에 문제가 없는지 진단하고, 발견된 특이사항과 조치 방법을 한국어로 간결하게 설명해주세요.", logs)
+	model := cfg.AzureDeployment
+	if cfg.LLMProvider == "ollama" {
+		model = cfg.OllamaModel
+	}
 
 	req := llm.ChatRequest{
-		Model: cfg.AzureDeployment,
+		Model: model,
 		Messages: []llm.Message{
 			{
 				Role:    llm.RoleSystem,
@@ -82,7 +110,7 @@ func AnalyzeBootLogs(ctx context.Context, cfg *config.AppConfig, logs string) (s
 		},
 	}
 
-	ctxTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(ctx, 90*time.Second)
 	defer cancel()
 
 	resp, err := client.Complete(ctxTimeout, req)

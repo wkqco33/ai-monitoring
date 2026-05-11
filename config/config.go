@@ -16,6 +16,9 @@ type AppConfig struct {
 	AzureEndpoint   string        `wconf:"azure_endpoint"`
 	AzureOpenAIKey  string        `wconf:"azure_api_key"`
 	AzureDeployment string        `wconf:"azure_deployment"`
+	LLMProvider     string        `wconf:"llm_provider" default:"azure"`
+	OllamaEndpoint  string        `wconf:"ollama_endpoint" default:"http://localhost:11434"`
+	OllamaModel     string        `wconf:"ollama_model" default:"llama3"`
 	BotToken        string        `wconf:"bot_token"`
 	CooldownPeriod  time.Duration `wconf:"cooldown_period" default:"5m"`
 }

@@ -5,10 +5,10 @@ import (
 	"sort"
 	"time"
 
+	"ai-monitoring/config"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/process"
-	"ai-monitoring/config"
 )
 
 type ProcessInfo struct {
