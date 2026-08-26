@@ -16,19 +16,19 @@ ai-monitoring 프로젝트에 기여해 주셔서 감사합니다. 아래 가이
 
 ```bash
 # 의존성 설치
-make tidy
+task tidy
 
 # 테스트 실행
-make test
+task test
 
-# 코드 포맷팅 (gofmt)
-make fmt
+# 코드 포맷팅
+task fmt
 
 # 정적 분석
-make vet
+task vet
 ```
 
-커밋 전에 위의 `make test`, `make fmt`, `make vet`를 모두 통과해야 합니다.
+커밋 전에 위의 `task test`, `task fmt`, `task vet`를 모두 통과해야 합니다.
 
 ## 이슈 / PR 절차
 

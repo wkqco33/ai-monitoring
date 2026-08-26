@@ -21,16 +21,16 @@
 변경 완료 전에 반드시 아래 명령을 실행하고 모두 통과해야 합니다.
 
 ```bash
-make test   # go test ./...
-make fmt    # gofmt
-make vet    # go vet
+task test   # go test ./...
+task fmt    # gofmt
+task vet    # go vet
 ```
 
 테스트 명령 하나라도 실패하면 커밋하지 마세요.
 
 ## 코드 스타일 규칙
 
-- Go 표준 `gofmt` 포맷을 반드시 유지합니다. `make fmt`로 자동 정렬하세요.
+- Go 표준 `gofmt` 포맷을 반드시 유지합니다. `task fmt`로 자동 정렬하세요.
 - import 순서: 표준 라이브러리 → 외부 → 로컬 패키지(위에서 아래로 그룹). `gofmt`/`goimports`가 처리합니다.
 - `go vet` 경고를 남기지 마세요.
 

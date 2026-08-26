@@ -36,7 +36,7 @@ CPU와 메모리 사용률을 주기적으로 확인하고, 임계치를 넘으�
 ## 요구 사항
 
 - Go 1.26.1 이상
-- `make`
+- `task` (Taskfile 러너) — 설치: https://taskfile.dev
 - Azure OpenAI 사용 시 엔드포인트와 API 키
 - Linux에서 부팅 로그 확인 시 `journalctl` 접근 권한
 - OS 알림 사용 시 데스크톱 알림을 지원하는 환경
@@ -46,7 +46,7 @@ CPU와 메모리 사용률을 주기적으로 확인하고, 임계치를 넘으�
 ### 소스 빌드
 
 ```bash
-make build
+task build
 ```
 
 빌드 결과물은 프로젝트 루트의 `ai-monitoring` 바이너리로 생성됩니다.
@@ -54,7 +54,7 @@ make build
 ### 시스템 설치
 
 ```bash
-sudo make install
+sudo task install
 ```
 
 기본 설치 경로는 `/usr/local/bin/ai-monitoring` 입니다.
@@ -95,20 +95,19 @@ export AI_MONITORING_COOLDOWN_PERIOD=5m
 
 ### 설정 항목
 
-| 키 | 타입 | 기본값 | 설명 |
-| --- | --- | --- | --- |
-| `llm_provider` | string | `azure` | LLM 제공자 (`azure`, `ollama`) |
-| `ollama_endpoint` | string | `http://localhost:11434` | Ollama 서버 API 엔드포인트 |
-| `ollama_model` | string | `llama3` | Ollama에서 사용할 모델명 |
-| `check_interval` | duration | `10s` | 시스템 상태를 확인하는 주기 |
-| `cpu_threshold` | float | `90.0` | CPU 사용률 경고 기준(%) |
-| `memory_threshold` | float | `90.0` | 메모리 사용률 경고 기준(%) |
-| `azure_endpoint` | string | 없음 | Azure OpenAI 엔드포인트 |
-| `azure_api_key` | string | 없음 | Azure OpenAI API 키 |
-| `azure_deployment` | string | 없음 | Azure OpenAI 배포 이름 |
-| `bot_token` | string | 없음 | 알림 봇 토큰 예약 값 |
-| `cooldown_period` | duration | `5m` | 동일 알림 재전송 최소 간격 |
-
+| 키                 | 타입     | 기본값                   | 설명                           |
+| ------------------ | -------- | ------------------------ | ------------------------------ |
+| `llm_provider`     | string   | `azure`                  | LLM 제공자 (`azure`, `ollama`) |
+| `ollama_endpoint`  | string   | `http://localhost:11434` | Ollama 서버 API 엔드포인트     |
+| `ollama_model`     | string   | `llama3`                 | Ollama에서 사용할 모델명       |
+| `check_interval`   | duration | `10s`                    | 시스템 상태를 확인하는 주기    |
+| `cpu_threshold`    | float    | `90.0`                   | CPU 사용률 경고 기준(%)        |
+| `memory_threshold` | float    | `90.0`                   | 메모리 사용률 경고 기준(%)     |
+| `azure_endpoint`   | string   | 없음                     | Azure OpenAI 엔드포인트        |
+| `azure_api_key`    | string   | 없음                     | Azure OpenAI API 키            |
+| `azure_deployment` | string   | 없음                     | Azure OpenAI 배포 이름         |
+| `bot_token`        | string   | 없음                     | 알림 봇 토큰 예약 값           |
+| `cooldown_period`  | duration | `5m`                     | 동일 알림 재전송 최소 간격     |
 
 ### 예시 `config.yaml`
 
@@ -187,10 +186,10 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 ## 개발 명령
 
 ```bash
-make test
-make fmt
-make vet
-make tidy
+task test
+task fmt
+task vet
+task tidy
 ```
 
 개발 워크플로우(TDD)와 코드 스타일은 [`AGENTS.md`](AGENTS.md)를, 기여 절차는 [`CONTRIBUTING.md`](CONTRIBUTING.md)를 참고하세요.

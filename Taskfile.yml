@@ -1,0 +1,56 @@
+# https://taskfile.dev
+version: '3'
+
+vars:
+  BINARY: ai-monitoring
+  PREFIX: /usr/local
+  BINDIR: "{{.PREFIX}}/bin"
+
+tasks:
+  default:
+    desc: 프로젝트 빌드 (기본 타겟)
+    cmds:
+      - task: build
+
+  build:
+    desc: 프로젝트 빌드
+    cmds:
+      - go build -o {{.BINARY}} main.go
+
+  clean:
+    desc: 빌드 결과물 삭제
+    cmds:
+      - rm -f {{.BINARY}}
+
+  install:
+    desc: BINDIR에 설치 (sudo 권한 필요할 수 있음)
+    deps:
+      - build
+    cmds:
+      - install -d {{.BINDIR}}
+      - install -m 755 {{.BINARY}} {{.BINDIR}}/{{.BINARY}}
+
+  uninstall:
+    desc: 설치된 바이너리 삭제
+    cmds:
+      - rm -f {{.BINDIR}}/{{.BINARY}}
+
+  test:
+    desc: 전체 테스트 실행
+    cmds:
+      - go test -v ./...
+
+  fmt:
+    desc: 코드 포맷팅 적용
+    cmds:
+      - go fmt ./...
+
+  vet:
+    desc: 정적 분석 실행
+    cmds:
+      - go vet ./...
+
+  tidy:
+    desc: 의존성(go.mod) 정리
+    cmds:
+      - go mod tidy
