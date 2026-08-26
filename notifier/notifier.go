@@ -3,8 +3,8 @@ package notifier
 import (
 	"log/slog"
 
-	"github.com/gen2brain/beeep"
 	"ai-monitoring/config"
+	"github.com/gen2brain/beeep"
 )
 
 // Notify 분석 결과를 사용자에게 알립니다.

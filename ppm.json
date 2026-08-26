@@ -1,0 +1,7 @@
+{
+  "description": "AI를 이용해 시스템 상태 이상을 감지하고 분석하는 PC 모니터링 도구",
+  "author": "wkqco33",
+  "homepage": "https://github.com/wkqco33/ai-monitoring",
+  "bin_name": "ai-monitoring",
+  "dependencies": {}
+}

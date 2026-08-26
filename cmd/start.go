@@ -5,12 +5,12 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/seoyc/wcli"
-	"github.com/seoyc/wcli/rich"
 	"ai-monitoring/analyzer"
 	"ai-monitoring/config"
 	"ai-monitoring/monitor"
 	"ai-monitoring/notifier"
+	"github.com/seoyc/wcli"
+	"github.com/seoyc/wcli/rich"
 )
 
 var (
@@ -53,7 +53,7 @@ var startCmd = &wcli.Command{
 		}
 
 		rich.Println("[bold][green]Starting ai-monitoring[/green][/bold]")
-		rich.Println("[dim]Interval: %v, CPU Threshold: %.1f%%, Memory Threshold: %.1f%%[/dim]", 
+		rich.Println("[dim]Interval: %v, CPU Threshold: %.1f%%, Memory Threshold: %.1f%%[/dim]",
 			cfg.CheckInterval, cfg.CPUThreshold, cfg.MemoryThreshold)
 
 		// 부팅 로그 진단
@@ -67,9 +67,9 @@ var startCmd = &wcli.Command{
 		} else {
 			summary := monitor.GetBootSummary(bootLogs)
 			rich.Println("[dim]Recent Boot Issues:\n%s[/dim]", summary)
-			
+
 			rich.Println("[magenta]Analyzing boot logs with LLM...[/magenta]")
-			
+
 			var bootAnalysis string
 			maxRetries := 5
 			for i := 0; i < maxRetries; i++ {
@@ -112,7 +112,7 @@ var startCmd = &wcli.Command{
 
 			rich.Println("[bold][cyan]Analysis complete[/cyan][/bold]")
 			rich.Println("[white]%s[/white]", analysis)
-			
+
 			notifier.Notify(cfg, "PC 상태 이상 감지", analysis)
 		}
 		return nil
@@ -121,7 +121,7 @@ var startCmd = &wcli.Command{
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	
+
 	f := startCmd.Flags()
 	f.DurationVar(&interval, "interval", "i", 10*time.Second, "Check interval")
 	f.Float64Var(&cpuThreshold, "cpu", "c", 90.0, "CPU usage threshold (%)")

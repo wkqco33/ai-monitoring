@@ -193,6 +193,12 @@ make vet
 make tidy
 ```
 
+개발 워크플로우(TDD)와 코드 스타일은 [`AGENTS.md`](AGENTS.md)를, 기여 절차는 [`CONTRIBUTING.md`](CONTRIBUTING.md)를 참고하세요.
+
+## 보안
+
+보안 취약점 보고와 민감 정보 처리 정책은 [`SECURITY.md`](SECURITY.md)를 참고하세요.
+
 ## 라이선스
 
-프로젝트에 별도 라이선스 파일이 없다면, 사용 전 소유자에게 정책을 확인하세요.
+이 프로젝트는 [MIT 라이선스](LICENSE)로 배포됩니다.

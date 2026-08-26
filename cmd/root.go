@@ -3,9 +3,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/seoyc/wcli"
 	"ai-monitoring/config"
 	"ai-monitoring/logger"
+	"github.com/seoyc/wcli"
 )
 
 var (
@@ -19,13 +19,8 @@ var rootCmd = &wcli.Command{
 	Long:  "Automatically monitors PC state and uses LLM to analyze anomalies.",
 	PersistentPreRun: func(ctx *wcli.Context) error {
 		logger.Init(debug)
-
-		// 설정 로드
-		if err := config.Load(configPath); err != nil {
-			// 설정 파일이 없어도 기본값으로 동작하도록 에러 처리는 로그만 남기거나 무시할 수 있습니다.
-			// 여기서는 wconf.Load가 설정 소스가 없으면 에러를 내므로, 
-			// configPath가 기본값일 때 파일이 없는 경우는 허용하도록 처리할 수 있습니다.
-		}
+		// 설정 파일이 없으면 기본값으로 동작하도록 로드 에러는 무시합니다.
+		_ = config.Load(configPath)
 		return nil
 	},
 }

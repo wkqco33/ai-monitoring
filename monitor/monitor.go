@@ -25,24 +25,30 @@ type SystemState struct {
 	Processes []ProcessInfo
 }
 
-// GetSystemState 현재 시스템 상태 반환
-func GetSystemState(topN int) (*SystemState, error) {
-	// CPU
+// GetUsage CPU와 메모리 사용률만 가볍게 조회합니다.
+func GetUsage() (float64, float64, error) {
 	cpuPercents, err := cpu.Percent(0, false)
 	if err != nil {
-		return nil, err
+		return 0, 0, err
 	}
 	cpuUsage := 0.0
 	if len(cpuPercents) > 0 {
 		cpuUsage = cpuPercents[0]
 	}
 
-	// Memory
 	v, err := mem.VirtualMemory()
+	if err != nil {
+		return 0, 0, err
+	}
+	return cpuUsage, v.UsedPercent, nil
+}
+
+// GetSystemState 현재 시스템 상태 반환
+func GetSystemState(topN int) (*SystemState, error) {
+	cpuUsage, memUsage, err := GetUsage()
 	if err != nil {
 		return nil, err
 	}
-	memUsage := v.UsedPercent
 
 	// Processes
 	procs, err := process.Processes()
@@ -92,16 +98,23 @@ func Start(cfg *config.AppConfig, triggerCh chan<- *SystemState) {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		state, err := GetSystemState(10) // Top 10 프로세스
+		// 무거운 프로세스 정보 수집은 임계치 초과 시에만 수행해 부하를 줄입니다.
+		cpuUsage, memUsage, err := GetUsage()
 		if err != nil {
 			slog.Error("시스템 상태를 가져오는데 실패했습니다", "error", err)
 			continue
 		}
 
-		slog.Debug("현재 상태", "cpu", state.CPUUsage, "mem", state.MemUsage)
+		slog.Debug("현재 상태", "cpu", cpuUsage, "mem", memUsage)
 
-		if state.CPUUsage > cfg.CPUThreshold || state.MemUsage > cfg.MemoryThreshold {
-			slog.Warn("임계치 초과 감지!", "cpu", state.CPUUsage, "mem", state.MemUsage)
+		if cpuUsage > cfg.CPUThreshold || memUsage > cfg.MemoryThreshold {
+			slog.Warn("임계치 초과 감지!", "cpu", cpuUsage, "mem", memUsage)
+
+			state, err := GetSystemState(10)
+			if err != nil {
+				slog.Error("프로세스 정보 수집 실패", "error", err)
+				continue
+			}
 			triggerCh <- state
 		}
 	}
