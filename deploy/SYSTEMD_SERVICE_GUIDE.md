@@ -22,7 +22,7 @@ API 키와 같은 민감한 정보를 안전하게 관리하기 위해 환경 �
 
 ```bash
 # 템플릿 복사
-sudo cp ai-monitoring.env.example /etc/default/ai-monitoring
+sudo cp deploy/ai-monitoring.env.example /etc/default/ai-monitoring
 
 # 파일 편집 (AI_MONITORING_ 접두사 형식으로 입력)
 sudo nano /etc/default/ai-monitoring
@@ -55,7 +55,7 @@ sudo chown seoyc:seoyc /var/log/ai-monitoring.log
 작성된 `.service` 파일을 systemd 설정 디렉토리에 복사합니다.
 
 ```bash
-sudo cp ai-monitoring.service /etc/systemd/system/
+sudo cp deploy/ai-monitoring.service /etc/systemd/system/
 ```
 
 ### 5단계: 서비스 시작 및 활성화

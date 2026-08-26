@@ -31,7 +31,7 @@ CPU와 메모리 사용률을 주기적으로 확인하고, 임계치를 넘으�
 - `notifier/`: 알림 전송
 - `logger/`: 로그 초기화
 - `config.example.yaml`: 설정 예시
-- `ai-monitoring.service`: systemd 서비스 파일 예시
+- `deploy/`: systemd 서비스 파일 및 배포 관련 파일
 
 ## 요구 사항
 
@@ -163,13 +163,13 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 
 ## systemd 서비스로 실행
 
-`ai-monitoring.service` 파일과 `SYSTEMD_SERVICE_GUIDE.md`를 참고해 systemd 서비스로 등록할 수 있습니다.
+`deploy/ai-monitoring.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 systemd 서비스로 등록할 수 있습니다.
 
 핵심 흐름은 다음과 같습니다.
 
 1. 바이너리를 설치합니다.
 2. `/etc/default/ai-monitoring` 에 Azure 관련 환경변수를 설정합니다.
-3. `ai-monitoring.service` 를 `/etc/systemd/system/` 에 복사합니다.
+3. `deploy/ai-monitoring.service` 를 `/etc/systemd/system/` 에 복사합니다.
 4. `systemctl enable --now ai-monitoring` 로 서비스 등록 및 시작을 수행합니다.
 
 ## 알림 기능 상태
