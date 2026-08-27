@@ -9,8 +9,8 @@ import (
 	"ai-monitoring/config"
 	"ai-monitoring/monitor"
 	"ai-monitoring/notifier"
-	"github.com/seoyc/wcli"
-	"github.com/seoyc/wcli/rich"
+	"github.com/wkqco33/wcli"
+	"github.com/wkqco33/wcli/rich"
 )
 
 var (
@@ -21,6 +21,7 @@ var (
 	azureEndpoint   string
 	azureOpenAIKey  string
 	azureDeployment string
+	startFlags      *wcli.FlagSet
 )
 
 var startCmd = &wcli.Command{
@@ -30,29 +31,33 @@ var startCmd = &wcli.Command{
 		cfg := config.GlobalConfig
 
 		// 플래그가 명시적으로 설정된 경우 설정을 덮어씁니다.
-		if ctx.IsSet("interval") {
+		if startFlags.Changed("interval") {
 			cfg.CheckInterval = interval
 		}
-		if ctx.IsSet("cpu") {
+		if startFlags.Changed("cpu") {
 			cfg.CPUThreshold = cpuThreshold
 		}
-		if ctx.IsSet("mem") {
+		if startFlags.Changed("mem") {
 			cfg.MemoryThreshold = memThreshold
 		}
-		if ctx.IsSet("cooldown") {
+		if startFlags.Changed("cooldown") {
 			cfg.CooldownPeriod = cooldownPeriod
 		}
-		if ctx.IsSet("azure-endpoint") {
+		if startFlags.Changed("azure-endpoint") {
 			cfg.AzureEndpoint = azureEndpoint
 		}
-		if ctx.IsSet("azure-key") {
+		if startFlags.Changed("azure-key") {
 			cfg.AzureOpenAIKey = azureOpenAIKey
 		}
-		if ctx.IsSet("azure-deployment") {
+		if startFlags.Changed("azure-deployment") {
 			cfg.AzureDeployment = azureDeployment
 		}
 
 		rich.Println("[bold][green]Starting ai-monitoring[/green][/bold]")
+		slog.Info("monitoring started",
+			"interval", cfg.CheckInterval,
+			"cpu_threshold", cfg.CPUThreshold,
+			"memory_threshold", cfg.MemoryThreshold)
 		rich.Println("[dim]Interval: %v, CPU Threshold: %.1f%%, Memory Threshold: %.1f%%[/dim]",
 			cfg.CheckInterval, cfg.CPUThreshold, cfg.MemoryThreshold)
 
@@ -102,15 +107,20 @@ var startCmd = &wcli.Command{
 			}
 
 			rich.Println("[yellow]Anomaly detected. Starting analysis...[/yellow]")
+			slog.Info("anomaly detected, starting analysis",
+				"cpu", state.CPUUsage,
+				"memory", state.MemUsage)
 			lastAlert = time.Now()
 
 			analysis, err := analyzer.AnalyzeSystemState(runCtx, cfg, state)
 			if err != nil {
 				rich.Println("[red]Failed to analyze system state: %v[/red]", err)
+				slog.Error("failed to analyze system state", "error", err)
 				continue
 			}
 
 			rich.Println("[bold][cyan]Analysis complete[/cyan][/bold]")
+			slog.Info("analysis complete")
 			rich.Println("[white]%s[/white]", analysis)
 
 			notifier.Notify(cfg, "PC 상태 이상 감지", analysis)
@@ -122,7 +132,8 @@ var startCmd = &wcli.Command{
 func init() {
 	rootCmd.AddCommand(startCmd)
 
-	f := startCmd.Flags()
+	startFlags = startCmd.Flags()
+	f := startFlags
 	f.DurationVar(&interval, "interval", "i", 10*time.Second, "Check interval")
 	f.Float64Var(&cpuThreshold, "cpu", "c", 90.0, "CPU usage threshold (%)")
 	f.Float64Var(&memThreshold, "mem", "m", 90.0, "Memory usage threshold (%)")

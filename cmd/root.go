@@ -3,9 +3,10 @@ package cmd
 import (
 	"os"
 
+	"github.com/wkqco33/wcli"
+
 	"ai-monitoring/config"
 	"ai-monitoring/logger"
-	"github.com/seoyc/wcli"
 )
 
 var (

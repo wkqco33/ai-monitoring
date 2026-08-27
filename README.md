@@ -161,6 +161,33 @@ cooldown_period: 5m
 
 CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 
+### `config` 옵션
+
+설정 파일을 관리하는 커맨드입니다.
+
+```bash
+# 기본 경로(~/.config/ai-monitoring/config.yaml)에 기본 설정 파일 생성
+./ai-monitoring config init
+
+# 현재 설정 표시
+./ai-monitoring config show
+
+# 특정 키 값 변경 후 저장 (키 목록은 README의 '설정 항목' 참고)
+./ai-monitoring config set cpu_threshold 80.0
+./ai-monitoring config set llm_provider ollama
+```
+
+### `log` 옵션
+
+로그 파일에서 최근 로그를 출력합니다.
+
+```bash
+./ai-monitoring log              # 최근 50줄
+./ai-monitoring log --lines 10   # 최근 10줄
+```
+
+로그 파일은 기본적으로 `~/.local/state/ai-monitoring/ai-monitoring.log` 에 저장됩니다.
+
 ## systemd 서비스로 실행
 
 `deploy/ai-monitoring.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 systemd 서비스로 등록할 수 있습니다.

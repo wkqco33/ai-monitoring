@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"wconf"
+	"github.com/wkqco33/wcli/config"
 )
 
 // AppConfig 설정 정보
@@ -28,16 +28,18 @@ var GlobalConfig = &AppConfig{}
 
 // Load 설정을 로드합니다.
 func Load(configPath string) error {
-	options := []wconf.Option{
-		wconf.WithEnv(),
-		wconf.WithPrefix("AI_MONITORING"),
+	options := []config.BindOption{
+		config.WithEnv(),
+		config.WithPrefix("AI_MONITORING"),
+		// 구조체 필드가 `wconf:"..."` 태그를 사용하므로 태그명을 유지합니다.
+		config.WithTag("wconf"),
 	}
 
 	if configPath != "" {
-		options = append(options, wconf.WithFiles(configPath))
+		options = append(options, config.WithFiles(configPath))
 	}
 
-	return wconf.Load(GlobalConfig, options...)
+	return config.Load(GlobalConfig, options...)
 }
 
 // GetDefaultConfigPath 기본 설정 파일 경로를 반환합니다. (~/.config/ai-monitoring/config.yaml)
