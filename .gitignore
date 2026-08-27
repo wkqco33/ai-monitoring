@@ -20,6 +20,12 @@
 
 # Compiled project binary (see Makefile)
 /ai-monitoring
+/aimon
+/dist/
+*.log
+.env
+*.env
+!.env.example
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
