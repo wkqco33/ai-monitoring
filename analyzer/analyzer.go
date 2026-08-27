@@ -8,9 +8,9 @@ import (
 
 	"ai-monitoring/config"
 	"ai-monitoring/monitor"
-	llm "llm-client-go"
-	"llm-client-go/azure"
-	"llm-client-go/ollama"
+	llm "github.com/wkqco33/LLM_client_go"
+	"github.com/wkqco33/LLM_client_go/azure"
+	"github.com/wkqco33/LLM_client_go/ollama"
 )
 
 // LLMClient는 다양한 LLM 제공자를 추상화하는 인터페이스입니다.

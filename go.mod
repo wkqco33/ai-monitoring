@@ -2,13 +2,11 @@ module ai-monitoring
 
 go 1.26.1
 
-replace llm-client-go => ./LLM_client_go
-
 require (
 	github.com/gen2brain/beeep v0.11.2
 	github.com/shirou/gopsutil/v4 v4.26.2
+	github.com/wkqco33/LLM_client_go v0.1.0
 	github.com/wkqco33/wcli v0.2.0
-	llm-client-go v0.0.0-00010101000000-000000000000
 )
 
 require (

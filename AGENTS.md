@@ -7,8 +7,7 @@
 
 - **ai-monitoring**: AI 기반 PC 상태 이상 감지 및 분석 도구 (Go).
 - **핵심 패키지**: `cmd`(CLI), `monitor`(상태 수집), `analyzer`(LLM 분석), `notifier`(알림), `config`(설정), `logger`(로깅).
-- **서브모듈**: `LLM_client_go`(LLM 클라이언트), `wcli`(CLI 프레임워크), `wconf`(설정 라이브러리).
-  - 서브모듈은 별도 저장소입니다. **서브모듈 내부 파일을 이 저장소에서 수정/커밋하지 마세요.**
+- **주요 의존성**: `github.com/wkqco33/LLM_client_go`(LLM 클라이언트), `github.com/wkqco33/wcli`(CLI 프레임워크).
 
 ## 필수 개발 워크플로우 (TDD)
 
@@ -57,5 +56,4 @@ task vet    # go vet
 ## 금지 사항
 
 - 빌드 산출물(예: `ai-monitoring` 바이너리), `.env`, 실제 API 키/토큰을 커밋하지 마세요.
-- 서브모듈(`LLM_client_go`, `wcli`, `wconf`) 내부를 직접 수정하지 마세요.
 - 배포용 `ppm.json`을 수정할 때는 `PACKAGE_GUIDE.md` 규칙을 따르세요.

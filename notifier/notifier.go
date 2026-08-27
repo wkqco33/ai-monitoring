@@ -19,7 +19,7 @@ func Notify(cfg *config.AppConfig, title, message string) {
 
 	// 봇 알림 (설정된 경우)
 	if cfg.BotToken != "" {
-		// TODO: llm-client-go/bots 패키지를 활용한 봇 전송 로직 구현
+		// TODO: github.com/wkqco33/LLM_client_go/bots 패키지를 활용한 봇 전송 로직 구현
 		slog.Info("봇 알림 전송 (TODO)", "token", cfg.BotToken)
 	}
 }
