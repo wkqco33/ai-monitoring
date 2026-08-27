@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Build binaries and package archives
+        run: |
+          mkdir -p dist
+          BIN_NAME=$(jq -r '.bin_name // "ai-monitoring"' ppm.json)
+          echo "Building binary: ${BIN_NAME}"
+
+          # Linux amd64
+          mkdir -p dist/linux_amd64
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o "dist/linux_amd64/${BIN_NAME}" .
+          tar -czf "dist/${BIN_NAME}_linux_amd64.tar.gz" -C "dist/linux_amd64" "${BIN_NAME}"
+
+          # Linux arm64
+          mkdir -p dist/linux_arm64
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o "dist/linux_arm64/${BIN_NAME}" .
+          tar -czf "dist/${BIN_NAME}_linux_arm64.tar.gz" -C "dist/linux_arm64" "${BIN_NAME}"
+
+          # macOS (Darwin) amd64
+          mkdir -p dist/darwin_amd64
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o "dist/darwin_amd64/${BIN_NAME}" .
+          tar -czf "dist/${BIN_NAME}_darwin_amd64.tar.gz" -C "dist/darwin_amd64" "${BIN_NAME}"
+
+          # macOS (Darwin) arm64
+          mkdir -p dist/darwin_arm64
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o "dist/darwin_arm64/${BIN_NAME}" .
+          tar -czf "dist/${BIN_NAME}_darwin_arm64.tar.gz" -C "dist/darwin_arm64" "${BIN_NAME}"
+
+          # Windows amd64
+          mkdir -p dist/windows_amd64
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o "dist/windows_amd64/${BIN_NAME}.exe" .
+          (cd dist/windows_amd64 && zip -9 "../${BIN_NAME}_windows_amd64.zip" "${BIN_NAME}.exe")
+
+          # Generate SHA-256 checksums
+          cd dist
+          for file in *.tar.gz *.zip; do
+            sha256sum "$file" > "${file}.sha256"
+          done
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.sha256
+          generate_release_notes: true
