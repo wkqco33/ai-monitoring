@@ -65,33 +65,14 @@ var startCmd = &wcli.Command{
 		rich.Println("[cyan]Waiting for network to stabilize (5s)...[/cyan]")
 		time.Sleep(5 * time.Second)
 
-		rich.Println("[cyan]Checking system boot logs...[/cyan]")
-		bootLogs, err := monitor.GetBootLogs()
+		analysis, err := runBootDiagnosis(ctx, cfg)
 		if err != nil {
-			rich.Println("[yellow]Warning: Could not fetch boot logs: %v[/yellow]", err)
+			rich.Println("[yellow]Warning: Boot diagnosis skipped: %v[/yellow]", err)
+		} else if analysis == "" {
+			rich.Println("[green]No boot issues detected.[/green]")
 		} else {
-			summary := monitor.GetBootSummary(bootLogs)
-			rich.Println("[dim]Recent Boot Issues:\n%s[/dim]", summary)
-
-			rich.Println("[magenta]Analyzing boot logs with LLM...[/magenta]")
-
-			var bootAnalysis string
-			maxRetries := 5
-			for i := 0; i < maxRetries; i++ {
-				bootAnalysis, err = analyzer.AnalyzeBootLogs(context.Background(), cfg, bootLogs)
-				if err == nil {
-					break
-				}
-				rich.Println("[yellow]Boot diagnosis attempt %d failed: %v. Retrying in 5s...[/yellow]", i+1, err)
-				time.Sleep(5 * time.Second)
-			}
-
-			if err != nil {
-				rich.Println("[red]Boot diagnosis failed after %d attempts: %v[/red]", maxRetries, err)
-			} else {
-				rich.Println("[bold][white]Boot Diagnosis:[/white][/bold]")
-				rich.Println("[white]%s[/white]", bootAnalysis)
-			}
+			rich.Println("[bold][white]Boot Diagnosis:[/white][/bold]")
+			rich.Println("[white]%s[/white]", analysis)
 		}
 
 		triggerCh := make(chan *monitor.SystemState)
