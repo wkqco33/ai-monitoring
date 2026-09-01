@@ -9,9 +9,10 @@ CPU와 메모리 사용률을 주기적으로 확인하고, 임계치를 넘으�
 - CPU 및 메모리 사용률 주기적 모니터링
 - 상위 프로세스 정보 수집
 - 임계치 초과 시 LLM 기반 이상 분석
-- 운영체제별 부팅 로그 진단
+- 운영체제별 부팅 로그 진단 (`boot` 커맨드)
+- 최근 로그 이상 분석 (`analyze` 커맨드)
+- 커맨드로 systemd 서비스 설치·제어 (`service` 커맨드)
 - 데스크톱 OS 알림 전송
-- systemd 서비스 등록 지원
 
 ## 동작 방식
 
@@ -188,9 +189,54 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 
 로그 파일은 기본적으로 `~/.local/state/ai-monitoring/ai-monitoring.log` 에 저장됩니다.
 
+### `analyze` 옵션
+
+최근 애플리케이션 로그를 LLM으로 분석해 특이사항을 요약합니다.
+
+```bash
+./ai-monitoring analyze              # 최근 100줄 분석
+./ai-monitoring analyze --lines 300  # 최근 300줄 분석
+```
+
+### `boot` 커맨드
+
+시스템 부팅 로그를 수집해 LLM으로 진단합니다. `start` 실행 시 수행되는 부팅 진단을 단독으로 실행할 때 사용합니다.
+
+```bash
+./ai-monitoring boot
+```
+
 ## systemd 서비스로 실행
 
-`deploy/ai-monitoring.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 systemd 서비스로 등록할 수 있습니다.
+### 커맨드로 등록 (권장)
+
+바이너리를 시스템에 설치한 뒤 `service` 커맨드로 등록합니다.
+
+```bash
+sudo task install               # /usr/local/bin/ai-monitoring 에 설치
+sudo ./ai-monitoring service install
+```
+
+`service install`은 다음을 수행합니다.
+
+- 현재 실행 중인 바이너리 경로와 실행 사용자를 자동으로 반영한 유닛 파일을 `/etc/systemd/system/`에 생성 (기존 파일이 있으면 `.bak` 백업)
+- `/etc/default/ai-monitoring` 환경변수 파일이 없으면 템플릿으로 생성 (기존 파일은 절대 덮어쓰지 않음)
+- `/var/log/ai-monitoring.log` 파일 생성 및 소유권 부여
+- `systemctl daemon-reload` 및 `systemctl enable --now` 실행
+
+서비스 관리:
+
+```bash
+sudo ./ai-monitoring service start
+sudo ./ai-monitoring service stop
+sudo ./ai-monitoring service restart
+./ai-monitoring service status
+sudo ./ai-monitoring service uninstall
+```
+
+### 수동 등록
+
+`deploy/ai-monitoring.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 수동으로 등록할 수도 있습니다.
 
 핵심 흐름은 다음과 같습니다.
 

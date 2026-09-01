@@ -6,7 +6,7 @@
 ## 프로젝트 개요
 
 - **ai-monitoring**: AI 기반 PC 상태 이상 감지 및 분석 도구 (Go).
-- **핵심 패키지**: `cmd`(CLI), `monitor`(상태 수집), `analyzer`(LLM 분석), `notifier`(알림), `config`(설정), `logger`(로깅).
+- **핵심 패키지**: `cmd`(CLI), `monitor`(상태 수집), `analyzer`(LLM 분석), `notifier`(알림), `config`(설정), `logger`(로깅), `service`(systemd 서비스 관리).
 - **주요 의존성**: `github.com/wkqco33/LLM_client_go`(LLM 클라이언트), `github.com/wkqco33/wcli`(CLI 프레임워크).
 
 ## 필수 개발 워크플로우 (TDD)
