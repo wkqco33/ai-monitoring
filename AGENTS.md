@@ -56,4 +56,4 @@ task vet    # go vet
 ## 금지 사항
 
 - 빌드 산출물(예: `pcam` 바이너리), `.env`, 실제 API 키/토큰을 커밋하지 마세요.
-- 배포용 `ppm.json`을 수정할 때는 `PACKAGE_GUIDE.md` 규칙을 따르세요.
+- 배포용 `ppm.json`의 `bin_name`은 `.github/workflows/release.yml`에서 릴리스 바이너리명으로 사용되므로, 변경 시 릴리스 산출물 이름과 일치시켜야 합니다.
