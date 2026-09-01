@@ -22,12 +22,21 @@ type LLMClient interface {
 // newClient는 테스트에서 목 클라이언트로 교체할 수 있도록 패키지 변수로 유지합니다.
 var newClient = getClient
 
+// normalizeOllamaEndpoint는 Ollama의 OpenAI 호환 API 경로(/v1)를 보장합니다.
+// 사용자가 호스트만 입력해도 /v1이 자동으로 붙도록 하여 잘못된 경로로 요청이 가는 것을 방지합니다.
+func normalizeOllamaEndpoint(endpoint string) string {
+	if endpoint == "" || strings.HasSuffix(endpoint, "/v1") || strings.HasSuffix(endpoint, "/v1/") {
+		return endpoint
+	}
+	return strings.TrimRight(endpoint, "/") + "/v1"
+}
+
 // getClient는 설정에 따라 적절한 LLM 클라이언트를 반환합니다.
 func getClient(cfg *config.AppConfig) (LLMClient, error) {
 	switch cfg.LLMProvider {
 	case "ollama":
 		return ollama.New(ollama.Config{
-			BaseURL: cfg.OllamaEndpoint,
+			BaseURL: normalizeOllamaEndpoint(cfg.OllamaEndpoint),
 		}), nil
 	case "azure":
 		if cfg.AzureEndpoint == "" || cfg.AzureOpenAIKey == "" {

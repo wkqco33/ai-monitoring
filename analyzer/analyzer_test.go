@@ -137,6 +137,27 @@ func TestTruncateTailShortInputUnchanged(t *testing.T) {
 	}
 }
 
+func TestNormalizeOllamaEndpoint(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"bare host", "http://localhost:11434", "http://localhost:11434/v1"},
+		{"already has v1", "http://localhost:11434/v1", "http://localhost:11434/v1"},
+		{"v1 with trailing slash", "http://localhost:11434/v1/", "http://localhost:11434/v1/"},
+		{"with path", "http://host:8080/ollama", "http://host:8080/ollama/v1"},
+		{"empty", "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := normalizeOllamaEndpoint(tt.in); got != tt.want {
+				t.Errorf("normalizeOllamaEndpoint(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFormatPrompt(t *testing.T) {
 	state := &monitor.SystemState{
 		CPUUsage: 95.5,
