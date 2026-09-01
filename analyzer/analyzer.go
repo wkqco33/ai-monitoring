@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"ai-monitoring/config"
@@ -91,6 +92,36 @@ func AnalyzeBootLogs(ctx context.Context, cfg *config.AppConfig, logs string) (s
 
 	systemPrompt := "당신은 시스템 보안 및 하드웨어 전문가입니다. 부팅 로그를 분석하여 잠재적인 하드웨어 문제나 소프트웨어 충돌을 진단합니다."
 	return complete(ctx, cfg, systemPrompt, userPrompt)
+}
+
+// maxLogPayloadChars는 LLM 요청에 담을 로그 페이로드의 최대 길이(문자 수)입니다.
+const maxLogPayloadChars = 8000
+
+// AnalyzeRecentLogs 최근 애플리케이션 로그를 분석해 특이사항을 요약합니다.
+func AnalyzeRecentLogs(ctx context.Context, cfg *config.AppConfig, logs string) (string, error) {
+	if strings.TrimSpace(logs) == "" {
+		return "", fmt.Errorf("분석할 로그가 없습니다")
+	}
+
+	userPrompt := fmt.Sprintf("다음은 ai-monitoring의 최근 동작 로그입니다:\n\n%s\n\n이 로그를 분석하여 반복되는 에러, 비정상 패턴, 임계치 초과 이력 등 주요 특이사항과 조치 방법을 한국어로 간결하게 정리해주세요.", truncateTail(logs, maxLogPayloadChars))
+
+	systemPrompt := "당신은 시스템 모니터링 로그 분석 전문가입니다. 주어진 로그에서 이상 징후를 찾아 원인과 조치 방안을 진단합니다."
+	return complete(ctx, cfg, systemPrompt, userPrompt)
+}
+
+// truncateTail은 문자열이 max를 초과하면 앞부분을 잘라내고 최근(뒷부분) 로그를 유지합니다.
+// 반환값은 마커를 포함해 max 문자를 넘지 않습니다.
+func truncateTail(s string, max int) string {
+	runes := []rune(s)
+	if len(runes) <= max {
+		return s
+	}
+	const marker = "...(앞부분 생략)...\n"
+	keep := max - len([]rune(marker))
+	if keep < 0 {
+		keep = 0
+	}
+	return marker + string(runes[len(runes)-keep:])
 }
 
 func formatPrompt(state *monitor.SystemState) string {

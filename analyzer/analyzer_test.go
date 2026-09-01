@@ -84,6 +84,59 @@ func TestAnalyzeBootLogsWithMockClient(t *testing.T) {
 	}
 }
 
+func TestAnalyzeRecentLogsEmpty(t *testing.T) {
+	mc := &mockClient{}
+	withMockClient(t, mc)
+
+	_, err := AnalyzeRecentLogs(context.Background(), testConfig(), " \n\t ")
+	if err == nil {
+		t.Fatal("expected error for empty logs")
+	}
+	if len(mc.req.Messages) != 0 {
+		t.Error("LLM should not be called for empty logs")
+	}
+}
+
+func TestAnalyzeRecentLogsReturnsContent(t *testing.T) {
+	mc := &mockClient{resp: &llm.ChatResponse{
+		Choices: []llm.Choice{{Message: llm.Message{Content: "에러 패턴 감지"}}},
+	}}
+	withMockClient(t, mc)
+
+	got, err := AnalyzeRecentLogs(context.Background(), testConfig(), "level=ERROR msg=cpu high")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "에러 패턴 감지" {
+		t.Errorf("expected 에러 패턴 감지, got %q", got)
+	}
+	if !strings.Contains(mc.req.Messages[1].Content, "level=ERROR") {
+		t.Errorf("user prompt should contain logs, got %q", mc.req.Messages[1].Content)
+	}
+}
+
+func TestTruncateTailKeepsRecentLogs(t *testing.T) {
+	long := strings.Repeat("a", maxLogPayloadChars) + "RECENT_LOG"
+	got := truncateTail(long, maxLogPayloadChars)
+
+	if !strings.HasSuffix(got, "RECENT_LOG") {
+		t.Errorf("tail should be preserved, got %q", got)
+	}
+	if !strings.HasPrefix(got, "...") {
+		t.Errorf("truncated log should be marked, got %q", got)
+	}
+	if len([]rune(got)) > maxLogPayloadChars {
+		t.Errorf("payload exceeds limit: %d", len([]rune(got)))
+	}
+}
+
+func TestTruncateTailShortInputUnchanged(t *testing.T) {
+	short := "short log"
+	if got := truncateTail(short, maxLogPayloadChars); got != short {
+		t.Errorf("short input should be unchanged, got %q", got)
+	}
+}
+
 func TestFormatPrompt(t *testing.T) {
 	state := &monitor.SystemState{
 		CPUUsage: 95.5,
