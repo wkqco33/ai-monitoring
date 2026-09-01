@@ -15,7 +15,7 @@ var (
 )
 
 var rootCmd = &wcli.Command{
-	Use:   "ai-monitoring",
+	Use:   "pcam",
 	Short: "AI PC Monitoring System",
 	Long:  "Automatically monitors PC state and uses LLM to analyze anomalies.",
 	PersistentPreRun: func(ctx *wcli.Context) error {

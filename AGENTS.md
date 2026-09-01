@@ -44,7 +44,7 @@ task vet    # go vet
 
 - 핵심 로직(`analyzer`, `monitor`, `config`, `notifier`)에는 단위 테스트를 함께 작성합니다.
 - 테스트는 **결정적(deterministic)**이어야 하며 호스트 환경변수 등 외부 상태에 의존하지 않게 합니다.
-  - 예: `config` 테스트는 `AI_MONITORING_*` 환경변수를 정리한 뒤 실행합니다.
+  - 예: `config` 테스트는 `PCAM_*` 환경변수를 정리한 뒤 실행합니다.
 - 외부 시스템(LLM API, OS 알림)은 목(mock) 또는 경계가 분리된 함수로 테스트 가능하게 유지합니다.
 
 ## 커밋 규칙
@@ -55,5 +55,5 @@ task vet    # go vet
 
 ## 금지 사항
 
-- 빌드 산출물(예: `ai-monitoring` 바이너리), `.env`, 실제 API 키/토큰을 커밋하지 마세요.
+- 빌드 산출물(예: `pcam` 바이너리), `.env`, 실제 API 키/토큰을 커밋하지 마세요.
 - 배포용 `ppm.json`을 수정할 때는 `PACKAGE_GUIDE.md` 규칙을 따르세요.

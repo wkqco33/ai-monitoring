@@ -14,10 +14,10 @@ func newTestManager(t *testing.T, run func(name string, args ...string) (string,
 	t.Helper()
 	dir := t.TempDir()
 	m := &Manager{
-		ServiceName:  "ai-monitoring",
-		UnitPath:     filepath.Join(dir, "ai-monitoring.service"),
-		EnvFile:      filepath.Join(dir, "ai-monitoring"),
-		LogFile:      filepath.Join(dir, "ai-monitoring.log"),
+		ServiceName:  "pcam",
+		UnitPath:     filepath.Join(dir, "pcam.service"),
+		EnvFile:      filepath.Join(dir, "pcam"),
+		LogFile:      filepath.Join(dir, "pcam.log"),
 		run:          run,
 		geteuid:      func() int { return 0 },
 		checkSystemd: func() error { return nil },
@@ -28,13 +28,13 @@ func newTestManager(t *testing.T, run func(name string, args ...string) (string,
 func testOptions() UnitOptions {
 	return UnitOptions{
 		Description: "AI PC Monitoring System",
-		BinaryPath:  "/usr/local/bin/ai-monitoring",
+		BinaryPath:  "/usr/local/bin/pcam",
 		UserName:    "testuser",
 		GroupName:   "testuser",
 		Uid:         -1,
 		Gid:         -1,
-		EnvFile:     "/etc/default/ai-monitoring",
-		LogFile:     "/var/log/ai-monitoring.log",
+		EnvFile:     "/etc/default/pcam",
+		LogFile:     "/var/log/pcam.log",
 	}
 }
 
@@ -53,7 +53,7 @@ func TestInstallWritesUnitFileAndEnablesService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unit file should be written: %v", err)
 	}
-	if !strings.Contains(string(data), "ExecStart=/usr/local/bin/ai-monitoring start") {
+	if !strings.Contains(string(data), "ExecStart=/usr/local/bin/pcam start") {
 		t.Errorf("unit file should contain ExecStart, got:\n%s", data)
 	}
 	if !strings.Contains(string(data), "User=testuser") {
@@ -66,11 +66,11 @@ func TestInstallWritesUnitFileAndEnablesService(t *testing.T) {
 	if cmds[0][1] != "daemon-reload" {
 		t.Errorf("first command should be daemon-reload, got %v", cmds[0])
 	}
-	if cmds[1][1] != "enable" || cmds[1][2] != "--now" || cmds[1][3] != "ai-monitoring" {
+	if cmds[1][1] != "enable" || cmds[1][2] != "--now" || cmds[1][3] != "pcam" {
 		t.Errorf("second command should be enable --now, got %v", cmds[1])
 	}
 
-	if _, err := os.Stat(filepath.Join(dir, "ai-monitoring.log")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "pcam.log")); err != nil {
 		t.Errorf("log file should be created: %v", err)
 	}
 }
@@ -86,14 +86,14 @@ func TestInstallCreatesEnvFileWhenMissing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("env file should be created: %v", err)
 	}
-	if !strings.Contains(string(data), "AI_MONITORING_LLM_PROVIDER") {
+	if !strings.Contains(string(data), "PCAM_LLM_PROVIDER") {
 		t.Errorf("env file should contain template, got:\n%s", data)
 	}
 }
 
 func TestInstallKeepsExistingEnvFile(t *testing.T) {
 	m, _ := newTestManager(t, func(name string, args ...string) (string, error) { return "", nil })
-	existing := "AI_MONITORING_API_KEY=secret-do-not-touch"
+	existing := "PCAM_API_KEY=secret-do-not-touch"
 	if err := os.WriteFile(m.EnvFile, []byte(existing), 0o600); err != nil {
 		t.Fatal(err)
 	}

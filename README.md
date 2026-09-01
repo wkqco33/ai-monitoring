@@ -1,4 +1,4 @@
-# ai-monitoring
+# pcam
 
 AI를 이용해 시스템 상태 이상을 감지하고 분석하는 PC 모니터링 도구입니다.
 
@@ -50,7 +50,7 @@ CPU와 메모리 사용률을 주기적으로 확인하고, 임계치를 넘으�
 task build
 ```
 
-빌드 결과물은 프로젝트 루트의 `ai-monitoring` 바이너리로 생성됩니다.
+빌드 결과물은 프로젝트 루트의 `pcam` 바이너리로 생성됩니다.
 
 ### 시스템 설치
 
@@ -58,7 +58,7 @@ task build
 sudo task install
 ```
 
-기본 설치 경로는 `/usr/local/bin/ai-monitoring` 입니다.
+기본 설치 경로는 `/usr/local/bin/pcam` 입니다.
 
 ## 설정
 
@@ -69,29 +69,29 @@ sudo task install
 기본 설정 파일 경로는 다음과 같습니다.
 
 ```bash
-~/.config/ai-monitoring/config.yaml
+~/.config/pcam/config.yaml
 ```
 
 예시 파일는 `config.example.yaml`에 있습니다. 이 파일을 복사해 실제 값으로 수정한 뒤 사용하세요.
 
 ### 2. 환경변수 사용
 
-환경변수는 `AI_MONITORING_` 접두사를 사용합니다. 예를 들어 `azure_endpoint`는 `AI_MONITORING_AZURE_ENDPOINT` 로 지정합니다.
+환경변수는 `PCAM_` 접두사를 사용합니다. 예를 들어 `azure_endpoint`는 `PCAM_AZURE_ENDPOINT` 로 지정합니다.
 
 예시:
 
 ```bash
-export AI_MONITORING_LLM_PROVIDER=ollama # azure 또는 ollama
-export AI_MONITORING_OLLAMA_ENDPOINT=http://localhost:11434
-export AI_MONITORING_OLLAMA_MODEL=llama3
-export AI_MONITORING_CHECK_INTERVAL=10s
-export AI_MONITORING_CPU_THRESHOLD=90.0
-export AI_MONITORING_MEMORY_THRESHOLD=90.0
-export AI_MONITORING_AZURE_ENDPOINT=https://your-resource-name.openai.azure.com/
-export AI_MONITORING_AZURE_API_KEY=your-api-key-here
-export AI_MONITORING_AZURE_DEPLOYMENT=gpt-4o
-export AI_MONITORING_BOT_TOKEN=your-bot-token-here
-export AI_MONITORING_COOLDOWN_PERIOD=5m
+export PCAM_LLM_PROVIDER=ollama # azure 또는 ollama
+export PCAM_OLLAMA_ENDPOINT=http://localhost:11434
+export PCAM_OLLAMA_MODEL=llama3
+export PCAM_CHECK_INTERVAL=10s
+export PCAM_CPU_THRESHOLD=90.0
+export PCAM_MEMORY_THRESHOLD=90.0
+export PCAM_AZURE_ENDPOINT=https://your-resource-name.openai.azure.com/
+export PCAM_AZURE_API_KEY=your-api-key-here
+export PCAM_AZURE_DEPLOYMENT=gpt-4o
+export PCAM_BOT_TOKEN=your-bot-token-here
+export PCAM_COOLDOWN_PERIOD=5m
 ```
 
 ### 설정 항목
@@ -128,19 +128,19 @@ cooldown_period: 5m
 기본 설정 파일 경로를 사용하면 다음처럼 실행할 수 있습니다.
 
 ```bash
-./ai-monitoring start
+./pcam start
 ```
 
 설정 파일 경로를 명시하려면 다음과 같이 실행합니다.
 
 ```bash
-./ai-monitoring --config ~/.config/ai-monitoring/config.yaml start
+./pcam --config ~/.config/pcam/config.yaml start
 ```
 
 디버그 로그를 켜려면 `--debug` 옵션을 추가합니다.
 
 ```bash
-./ai-monitoring --debug start
+./pcam --debug start
 ```
 
 ## CLI 옵션
@@ -167,15 +167,15 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 설정 파일을 관리하는 커맨드입니다.
 
 ```bash
-# 기본 경로(~/.config/ai-monitoring/config.yaml)에 기본 설정 파일 생성
-./ai-monitoring config init
+# 기본 경로(~/.config/pcam/config.yaml)에 기본 설정 파일 생성
+./pcam config init
 
 # 현재 설정 표시
-./ai-monitoring config show
+./pcam config show
 
 # 특정 키 값 변경 후 저장 (키 목록은 README의 '설정 항목' 참고)
-./ai-monitoring config set cpu_threshold 80.0
-./ai-monitoring config set llm_provider ollama
+./pcam config set cpu_threshold 80.0
+./pcam config set llm_provider ollama
 ```
 
 ### `log` 옵션
@@ -183,19 +183,19 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 로그 파일에서 최근 로그를 출력합니다.
 
 ```bash
-./ai-monitoring log              # 최근 50줄
-./ai-monitoring log --lines 10   # 최근 10줄
+./pcam log              # 최근 50줄
+./pcam log --lines 10   # 최근 10줄
 ```
 
-로그 파일은 기본적으로 `~/.local/state/ai-monitoring/ai-monitoring.log` 에 저장됩니다.
+로그 파일은 기본적으로 `~/.local/state/pcam/pcam.log` 에 저장됩니다.
 
 ### `analyze` 옵션
 
 최근 애플리케이션 로그를 LLM으로 분석해 특이사항을 요약합니다.
 
 ```bash
-./ai-monitoring analyze              # 최근 100줄 분석
-./ai-monitoring analyze --lines 300  # 최근 300줄 분석
+./pcam analyze              # 최근 100줄 분석
+./pcam analyze --lines 300  # 최근 300줄 분석
 ```
 
 ### `boot` 커맨드
@@ -203,7 +203,7 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 시스템 부팅 로그를 수집해 LLM으로 진단합니다. `start` 실행 시 수행되는 부팅 진단을 단독으로 실행할 때 사용합니다.
 
 ```bash
-./ai-monitoring boot
+./pcam boot
 ```
 
 ## systemd 서비스로 실행
@@ -213,37 +213,37 @@ CLI로 명시한 값은 설정 파일 값을 덮어씁니다.
 바이너리를 시스템에 설치한 뒤 `service` 커맨드로 등록합니다.
 
 ```bash
-sudo task install               # /usr/local/bin/ai-monitoring 에 설치
-sudo ./ai-monitoring service install
+sudo task install               # /usr/local/bin/pcam 에 설치
+sudo ./pcam service install
 ```
 
 `service install`은 다음을 수행합니다.
 
 - 현재 실행 중인 바이너리 경로와 실행 사용자를 자동으로 반영한 유닛 파일을 `/etc/systemd/system/`에 생성 (기존 파일이 있으면 `.bak` 백업)
-- `/etc/default/ai-monitoring` 환경변수 파일이 없으면 템플릿으로 생성 (기존 파일은 절대 덮어쓰지 않음)
-- `/var/log/ai-monitoring.log` 파일 생성 및 소유권 부여
+- `/etc/default/pcam` 환경변수 파일이 없으면 템플릿으로 생성 (기존 파일은 절대 덮어쓰지 않음)
+- `/var/log/pcam.log` 파일 생성 및 소유권 부여
 - `systemctl daemon-reload` 및 `systemctl enable --now` 실행
 
 서비스 관리:
 
 ```bash
-sudo ./ai-monitoring service start
-sudo ./ai-monitoring service stop
-sudo ./ai-monitoring service restart
-./ai-monitoring service status
-sudo ./ai-monitoring service uninstall
+sudo ./pcam service start
+sudo ./pcam service stop
+sudo ./pcam service restart
+./pcam service status
+sudo ./pcam service uninstall
 ```
 
 ### 수동 등록
 
-`deploy/ai-monitoring.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 수동으로 등록할 수도 있습니다.
+`deploy/pcam.service` 파일과 `deploy/SYSTEMD_SERVICE_GUIDE.md`를 참고해 수동으로 등록할 수도 있습니다.
 
 핵심 흐름은 다음과 같습니다.
 
 1. 바이너리를 설치합니다.
-2. `/etc/default/ai-monitoring` 에 Azure 관련 환경변수를 설정합니다.
-3. `deploy/ai-monitoring.service` 를 `/etc/systemd/system/` 에 복사합니다.
-4. `systemctl enable --now ai-monitoring` 로 서비스 등록 및 시작을 수행합니다.
+2. `/etc/default/pcam` 에 Azure 관련 환경변수를 설정합니다.
+3. `deploy/pcam.service` 를 `/etc/systemd/system/` 에 복사합니다.
+4. `systemctl enable --now pcam` 로 서비스 등록 및 시작을 수행합니다.
 
 ## 알림 기능 상태
 

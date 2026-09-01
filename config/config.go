@@ -30,7 +30,7 @@ var GlobalConfig = &AppConfig{}
 func Load(configPath string) error {
 	options := []config.BindOption{
 		config.WithEnv(),
-		config.WithPrefix("AI_MONITORING"),
+		config.WithPrefix("PCAM"),
 		// 구조체 필드가 `wconf:"..."` 태그를 사용하므로 태그명을 유지합니다.
 		config.WithTag("wconf"),
 	}
@@ -42,11 +42,11 @@ func Load(configPath string) error {
 	return config.Load(GlobalConfig, options...)
 }
 
-// GetDefaultConfigPath 기본 설정 파일 경로를 반환합니다. (~/.config/ai-monitoring/config.yaml)
+// GetDefaultConfigPath 기본 설정 파일 경로를 반환합니다. (~/.config/pcam/config.yaml)
 func GetDefaultConfigPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "config.yaml"
 	}
-	return filepath.Join(home, ".config", "ai-monitoring", "config.yaml")
+	return filepath.Join(home, ".config", "pcam", "config.yaml")
 }

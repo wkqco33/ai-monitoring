@@ -103,7 +103,7 @@ func AnalyzeRecentLogs(ctx context.Context, cfg *config.AppConfig, logs string) 
 		return "", fmt.Errorf("분석할 로그가 없습니다")
 	}
 
-	userPrompt := fmt.Sprintf("다음은 ai-monitoring의 최근 동작 로그입니다:\n\n%s\n\n이 로그를 분석하여 반복되는 에러, 비정상 패턴, 임계치 초과 이력 등 주요 특이사항과 조치 방법을 한국어로 간결하게 정리해주세요.", truncateTail(logs, maxLogPayloadChars))
+	userPrompt := fmt.Sprintf("다음은 pcam의 최근 동작 로그입니다:\n\n%s\n\n이 로그를 분석하여 반복되는 에러, 비정상 패턴, 임계치 초과 이력 등 주요 특이사항과 조치 방법을 한국어로 간결하게 정리해주세요.", truncateTail(logs, maxLogPayloadChars))
 
 	systemPrompt := "당신은 시스템 모니터링 로그 분석 전문가입니다. 주어진 로그에서 이상 징후를 찾아 원인과 조치 방안을 진단합니다."
 	return complete(ctx, cfg, systemPrompt, userPrompt)

@@ -10,33 +10,33 @@ import (
 )
 
 const (
-	DefaultServiceName = "ai-monitoring"
-	DefaultUnitPath    = "/etc/systemd/system/ai-monitoring.service"
-	DefaultEnvFile     = "/etc/default/ai-monitoring"
-	DefaultLogFile     = "/var/log/ai-monitoring.log"
+	DefaultServiceName = "pcam"
+	DefaultUnitPath    = "/etc/systemd/system/pcam.service"
+	DefaultEnvFile     = "/etc/default/pcam"
+	DefaultLogFile     = "/var/log/pcam.log"
 	DefaultBinaryPath  = "/usr/local/bin/" + DefaultServiceName
 )
 
 // DefaultEnvFileContent는 환경변수 파일이 없을 때 생성되는 템플릿입니다.
-const DefaultEnvFileContent = `# ai-monitoring systemd service environment file
-# AI_MONITORING_ 접두사 형식으로 작성해야 인식됩니다.
+const DefaultEnvFileContent = `# pcam systemd service environment file
+# PCAM_ 접두사 형식으로 작성해야 인식됩니다.
 
-AI_MONITORING_CHECK_INTERVAL=10s
-AI_MONITORING_CPU_THRESHOLD=90.0
-AI_MONITORING_MEMORY_THRESHOLD=90.0
+PCAM_CHECK_INTERVAL=10s
+PCAM_CPU_THRESHOLD=90.0
+PCAM_MEMORY_THRESHOLD=90.0
 
 # Azure OpenAI
-AI_MONITORING_AZURE_ENDPOINT=https://your-resource-name.openai.azure.com/
-AI_MONITORING_AZURE_API_KEY=your-api-key-here
-AI_MONITORING_AZURE_DEPLOYMENT=gpt-4o
+PCAM_AZURE_ENDPOINT=https://your-resource-name.openai.azure.com/
+PCAM_AZURE_API_KEY=your-api-key-here
+PCAM_AZURE_DEPLOYMENT=gpt-4o
 
 # Ollama (llm_provider=ollama 일 때 사용)
-# AI_MONITORING_LLM_PROVIDER=ollama
-# AI_MONITORING_OLLAMA_ENDPOINT=http://localhost:11434
-# AI_MONITORING_OLLAMA_MODEL=llama3
+# PCAM_LLM_PROVIDER=ollama
+# PCAM_OLLAMA_ENDPOINT=http://localhost:11434
+# PCAM_OLLAMA_MODEL=llama3
 
-AI_MONITORING_BOT_TOKEN=
-AI_MONITORING_COOLDOWN_PERIOD=5m
+PCAM_BOT_TOKEN=
+PCAM_COOLDOWN_PERIOD=5m
 `
 
 // Manager는 systemd 서비스 설치 및 제어를 담당합니다.
@@ -85,7 +85,7 @@ func checkSystemd() error {
 // requireRoot 시스템 파일을 수정할 수 있는 권한이 있는지 확인합니다.
 func (m *Manager) requireRoot() error {
 	if m.geteuid() != 0 {
-		return errors.New("root 권한이 필요합니다: sudo ai-monitoring service ...")
+		return errors.New("root 권한이 필요합니다: sudo pcam service ...")
 	}
 	return nil
 }
@@ -210,7 +210,7 @@ func (m *Manager) action(verb string) error {
 	}
 	out, err := m.run("systemctl", verb, m.ServiceName)
 	if err != nil {
-		return fmt.Errorf("systemctl %s 실패: %v\n%s\nroot 권한이 필요할 수 있습니다: sudo ai-monitoring service %s", verb, err, out, verb)
+		return fmt.Errorf("systemctl %s 실패: %v\n%s\nroot 권한이 필요할 수 있습니다: sudo pcam service %s", verb, err, out, verb)
 	}
 	return nil
 }

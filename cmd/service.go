@@ -12,8 +12,8 @@ import (
 
 var serviceCmd = &wcli.Command{
 	Use:   "service",
-	Short: "Manage the ai-monitoring systemd service",
-	Long:  "Install and control the ai-monitoring systemd service (Linux only). Most operations require root.",
+	Short: "Manage the pcam systemd service",
+	Long:  "Install and control the pcam systemd service (Linux only). Most operations require root.",
 }
 
 var serviceInstallCmd = &wcli.Command{
@@ -32,7 +32,7 @@ var serviceInstallCmd = &wcli.Command{
 			return err
 		}
 		rich.Println("[green]Service installed, started and enabled on boot.[/green]")
-		rich.Println("[dim]Env file: %s — fill in API keys, then run 'ai-monitoring service restart'.[/dim]", service.DefaultEnvFile)
+		rich.Println("[dim]Env file: %s — fill in API keys, then run 'pcam service restart'.[/dim]", service.DefaultEnvFile)
 		return nil
 	},
 }

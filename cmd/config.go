@@ -55,7 +55,7 @@ var configSetCmd = &wcli.Command{
 	Short: "Update a configuration value and save it",
 	Run: func(ctx *wcli.Context) error {
 		if len(ctx.Args) != 2 {
-			return fmt.Errorf("usage: ai-monitoring config set <key> <value>")
+			return fmt.Errorf("usage: pcam config set <key> <value>")
 		}
 		key, value := ctx.Args[0], ctx.Args[1]
 		if err := config.SetConfig(key, value); err != nil {

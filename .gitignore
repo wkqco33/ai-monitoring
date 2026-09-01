@@ -20,6 +20,7 @@
 
 # Compiled project binary (see Makefile)
 /ai-monitoring
+/pcam
 /aimon
 /dist/
 *.log

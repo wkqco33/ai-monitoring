@@ -35,16 +35,16 @@ func Init(debug bool) {
 	slog.SetDefault(slog.New(stdoutHandler))
 }
 
-// LogFilePath 기본 로그 파일 경로를 반환합니다. (~/.local/state/ai-monitoring/ai-monitoring.log)
+// LogFilePath 기본 로그 파일 경로를 반환합니다. (~/.local/state/pcam/pcam.log)
 func LogFilePath() string {
 	if logFilePath != "" {
 		return logFilePath
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "ai-monitoring.log"
+		return "pcam.log"
 	}
-	return filepath.Join(home, ".local", "state", "ai-monitoring", "ai-monitoring.log")
+	return filepath.Join(home, ".local", "state", "pcam", "pcam.log")
 }
 
 // openLogFile 로그 파일을 추가 쓰기 모드로 엽니다.

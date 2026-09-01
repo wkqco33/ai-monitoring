@@ -12,7 +12,7 @@ import (
 func unsetEnv(t *testing.T) {
 	t.Helper()
 	for _, e := range os.Environ() {
-		if strings.HasPrefix(e, "AI_MONITORING_") {
+		if strings.HasPrefix(e, "PCAM_") {
 			key := strings.SplitN(e, "=", 2)[0]
 			t.Setenv(key, "")
 			os.Unsetenv(key)
@@ -74,8 +74,8 @@ func TestLoadDefaultsWhenNoSource(t *testing.T) {
 func TestLoadFromEnvOverridesFile(t *testing.T) {
 	unsetEnv(t)
 
-	t.Setenv("AI_MONITORING_LLM_PROVIDER", "ollama")
-	t.Setenv("AI_MONITORING_CPU_THRESHOLD", "70.0")
+	t.Setenv("PCAM_LLM_PROVIDER", "ollama")
+	t.Setenv("PCAM_CPU_THRESHOLD", "70.0")
 
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	yaml := "llm_provider: azure\n"

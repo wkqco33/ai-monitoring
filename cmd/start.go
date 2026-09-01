@@ -53,7 +53,7 @@ var startCmd = &wcli.Command{
 			cfg.AzureDeployment = azureDeployment
 		}
 
-		rich.Println("[bold][green]Starting ai-monitoring[/green][/bold]")
+		rich.Println("[bold][green]Starting pcam[/green][/bold]")
 		slog.Info("monitoring started",
 			"interval", cfg.CheckInterval,
 			"cpu_threshold", cfg.CPUThreshold,

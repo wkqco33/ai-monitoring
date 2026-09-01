@@ -8,11 +8,11 @@ import (
 func TestRenderUnit(t *testing.T) {
 	opts := UnitOptions{
 		Description: "AI PC Monitoring System",
-		BinaryPath:  "/usr/local/bin/ai-monitoring",
+		BinaryPath:  "/usr/local/bin/pcam",
 		UserName:    "seoyc",
 		GroupName:   "seoyc",
-		EnvFile:     "/etc/default/ai-monitoring",
-		LogFile:     "/var/log/ai-monitoring.log",
+		EnvFile:     "/etc/default/pcam",
+		LogFile:     "/var/log/pcam.log",
 	}
 
 	got := RenderUnit(opts)
@@ -21,10 +21,10 @@ func TestRenderUnit(t *testing.T) {
 		"Description=AI PC Monitoring System",
 		"User=seoyc",
 		"Group=seoyc",
-		"EnvironmentFile=-/etc/default/ai-monitoring",
-		"ExecStart=/usr/local/bin/ai-monitoring start",
-		"StandardOutput=append:/var/log/ai-monitoring.log",
-		"StandardError=append:/var/log/ai-monitoring.log",
+		"EnvironmentFile=-/etc/default/pcam",
+		"ExecStart=/usr/local/bin/pcam start",
+		"StandardOutput=append:/var/log/pcam.log",
+		"StandardError=append:/var/log/pcam.log",
 		"WantedBy=multi-user.target",
 		"Restart=always",
 	}

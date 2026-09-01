@@ -15,7 +15,7 @@ var analyzeLines int
 var analyzeCmd = &wcli.Command{
 	Use:   "analyze",
 	Short: "Analyze recent logs for anomalies",
-	Long:  "Send recent ai-monitoring logs to the LLM and summarize anomalies.",
+	Long:  "Send recent pcam logs to the LLM and summarize anomalies.",
 	Run: func(ctx *wcli.Context) error {
 		lines, err := logger.ReadRecent(analyzeLines)
 		if err != nil {

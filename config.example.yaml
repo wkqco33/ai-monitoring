@@ -1,6 +1,6 @@
-# ai-monitoring 설정 예시
+# pcam 설정 예시
 #
-# 이 파일을 ~/.config/ai-monitoring/config.yaml 로 복사한 뒤
+# 이 파일을 ~/.config/pcam/config.yaml 로 복사한 뒤
 # 실제 값으로 수정해서 사용하세요.
 
 # 시스템 상태 점검 주기

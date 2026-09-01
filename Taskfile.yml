@@ -2,7 +2,7 @@
 version: '3'
 
 vars:
-  BINARY: ai-monitoring
+  BINARY: pcam
   PREFIX: /usr/local
   BINDIR: "{{.PREFIX}}/bin"
 
