@@ -41,7 +41,7 @@ mkdir -p ~/.local/state/pcam
 mv ~/.local/state/ai-monitoring/ai-monitoring.log ~/.local/state/pcam/pcam.log
 
 # 5. 새 바이너리 설치 및 서비스 등록
-task install
+sudo task install
 sudo ./pcam service install
 ```
 
@@ -52,7 +52,7 @@ sudo ./pcam service install
 프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 바이너리를 빌드하고 시스템 경로(`/usr/local/bin`)에 설치합니다.
 
 ```bash
-task install
+sudo task install
 ```
 
 ### 2단계: 환경 변수 설정
@@ -117,8 +117,8 @@ sudo systemctl enable pcam
 
 ## 4. 서비스 관리 명령어
 
-| 작업                 | 명령어                                 |
-| :------------------- | :------------------------------------- |
+| 작업                 | 명령어                        |
+| :------------------- | :---------------------------- |
 | **상태 확인**        | `sudo systemctl status pcam`  |
 | **로그 실시간 확인** | `tail -f /var/log/pcam.log`   |
 | **서비스 중지**      | `sudo systemctl stop pcam`    |
