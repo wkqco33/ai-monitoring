@@ -8,6 +8,8 @@ type UnitOptions struct {
 	BinaryPath  string
 	UserName    string
 	GroupName   string
+	Uid         int
+	Gid         int
 	EnvFile     string
 	LogFile     string
 }
