@@ -18,6 +18,9 @@ type LLMClient interface {
 	Complete(ctx context.Context, req llm.ChatRequest) (*llm.ChatResponse, error)
 }
 
+// newClient는 테스트에서 목 클라이언트로 교체할 수 있도록 패키지 변수로 유지합니다.
+var newClient = getClient
+
 // getClient는 설정에 따라 적절한 LLM 클라이언트를 반환합니다.
 func getClient(cfg *config.AppConfig) (LLMClient, error) {
 	switch cfg.LLMProvider {
@@ -38,15 +41,12 @@ func getClient(cfg *config.AppConfig) (LLMClient, error) {
 	}
 }
 
-// AnalyzeSystemState 시스템 상태를 분석합니다.
-func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monitor.SystemState) (string, error) {
-	client, err := getClient(cfg)
+// complete는 시스템/사용자 프롬프트로 LLM 완성 요청을 보내고 응답 텍스트를 반환합니다.
+func complete(ctx context.Context, cfg *config.AppConfig, systemPrompt, userPrompt string) (string, error) {
+	client, err := newClient(cfg)
 	if err != nil {
 		return "", err
 	}
-
-	prompt := formatPrompt(state)
-	slog.Debug("LLM에 프롬프트 전송", "prompt", prompt)
 
 	model := cfg.AzureDeployment
 	if cfg.LLMProvider == "ollama" {
@@ -56,14 +56,8 @@ func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monit
 	req := llm.ChatRequest{
 		Model: model,
 		Messages: []llm.Message{
-			{
-				Role:    llm.RoleSystem,
-				Content: "당신은 시스템 모니터링 전문가입니다. 제공된 시스템 상태를 분석하고, 리소스 사용량이 높은 원인과 해결 방안을 한국어로 간결하게 제시해주세요.",
-			},
-			{
-				Role:    llm.RoleUser,
-				Content: prompt,
-			},
+			{Role: llm.RoleSystem, Content: systemPrompt},
+			{Role: llm.RoleUser, Content: userPrompt},
 		},
 	}
 
@@ -82,47 +76,21 @@ func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monit
 	return "", fmt.Errorf("LLM에서 응답을 받지 못했습니다")
 }
 
+// AnalyzeSystemState 시스템 상태를 분석합니다.
+func AnalyzeSystemState(ctx context.Context, cfg *config.AppConfig, state *monitor.SystemState) (string, error) {
+	prompt := formatPrompt(state)
+	slog.Debug("LLM에 프롬프트 전송", "prompt", prompt)
+
+	systemPrompt := "당신은 시스템 모니터링 전문가입니다. 제공된 시스템 상태를 분석하고, 리소스 사용량이 높은 원인과 해결 방안을 한국어로 간결하게 제시해주세요."
+	return complete(ctx, cfg, systemPrompt, prompt)
+}
+
 // AnalyzeBootLogs 부팅 로그를 진단합니다.
 func AnalyzeBootLogs(ctx context.Context, cfg *config.AppConfig, logs string) (string, error) {
-	client, err := getClient(cfg)
-	if err != nil {
-		return "", err
-	}
+	userPrompt := fmt.Sprintf("다음은 시스템 부팅 시 발생한 주요 로그 또는 에러 메시지입니다:\n\n%s\n\n이 로그들을 분석하여 시스템 안정성에 문제가 없는지 진단하고, 발견된 특이사항와 조치 방법을 한국어로 간결하게 설명해주세요.", logs)
 
-	prompt := fmt.Sprintf("다음은 시스템 부팅 시 발생한 주요 로그 또는 에러 메시지입니다:\n\n%s\n\n이 로그들을 분석하여 시스템 안정성에 문제가 없는지 진단하고, 발견된 특이사항와 조치 방법을 한국어로 간결하게 설명해주세요.", logs)
-
-	model := cfg.AzureDeployment
-	if cfg.LLMProvider == "ollama" {
-		model = cfg.OllamaModel
-	}
-
-	req := llm.ChatRequest{
-		Model: model,
-		Messages: []llm.Message{
-			{
-				Role:    llm.RoleSystem,
-				Content: "당신은 시스템 보안 및 하드웨어 전문가입니다. 부팅 로그를 분석하여 잠재적인 하드웨어 문제나 소프트웨어 충돌을 진단합니다.",
-			},
-			{
-				Role:    llm.RoleUser,
-				Content: prompt,
-			},
-		},
-	}
-
-	ctxTimeout, cancel := context.WithTimeout(ctx, 90*time.Second)
-	defer cancel()
-
-	resp, err := client.Complete(ctxTimeout, req)
-	if err != nil {
-		return "", fmt.Errorf("부팅 진단 LLM 요청 실패: %w", err)
-	}
-
-	if len(resp.Choices) > 0 {
-		return resp.Choices[0].Message.Content, nil
-	}
-
-	return "", fmt.Errorf("부팅 진단 응답을 받지 못했습니다")
+	systemPrompt := "당신은 시스템 보안 및 하드웨어 전문가입니다. 부팅 로그를 분석하여 잠재적인 하드웨어 문제나 소프트웨어 충돌을 진단합니다."
+	return complete(ctx, cfg, systemPrompt, userPrompt)
 }
 
 func formatPrompt(state *monitor.SystemState) string {
